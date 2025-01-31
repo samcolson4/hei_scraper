@@ -68,6 +68,8 @@ with open("episodes.txt", "r") as file:
             "episode_title": "",
             "poster_url": "",
             "aired_at": "",
+            "show": "on_cinema",
+            "media_type": "episode"
         }
 
         headers = {
