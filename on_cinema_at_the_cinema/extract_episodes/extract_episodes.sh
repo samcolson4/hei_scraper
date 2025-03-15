@@ -10,7 +10,7 @@ fi
 input_file="$1"
 
 # Output file
-output_file="episodes.txt"
+output_file="../episodes.txt"
 
 # Extract lines containing 'heinetwork.tv/episode/' and save to output file
 grep -o 'heinetwork\.tv/episode/[^"]*' "$input_file" > "$output_file"
