@@ -4,6 +4,25 @@ import json
 from datetime import datetime
 import os
 import pdb
+import glob
+
+def get_latest_json_file():
+    json_files = glob.glob("episodes_*.json")
+    if not json_files:
+        return None
+    return max(json_files, key=os.path.getctime)
+
+
+def load_existing_urls():
+    latest_file = get_latest_json_file()
+    if not latest_file:
+        return set()
+    try:
+        with open(latest_file, "r") as file:
+            data = json.load(file)
+            return {item.get("episode_url") for item in data if "episode_url" in item}
+    except (FileNotFoundError, json.JSONDecodeError):
+        return set()
 
 
 def extract_date(air_date_str):
@@ -59,9 +78,14 @@ with open("episodes.txt", "r") as file:
     now = datetime.now()
     formatted_time = now.strftime("%d_%m_%y_%H_%M")
     filename = f"episodes_{formatted_time}.json"
+    existing_urls = load_existing_urls()
 
     for line in file:
         episode_url = "https://" + line.strip()
+        if episode_url in existing_urls:
+            print(f"Skipping existing episode: {episode_url}")
+            continue
+
         data = {
             "episode_url": episode_url,
             "collection": "",
