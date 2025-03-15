@@ -9,7 +9,7 @@ This repo is the scraper responsible for getting data from the HEI Network websi
 ### Progress
 - [X] On Cinema (show)
 - [X] Decker
-- [ ] Automate creating one large combined json file in root of repo
+- [X] Automate creating one large combined json file in root of repo
 - [ ] On Cinema (podcast)
 - [ ] HEI Network News
 - [ ] Automate checking
