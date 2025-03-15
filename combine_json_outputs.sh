@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-ON_CINEMA_DIR="./on_cinema"
+ON_CINEMA_DIR="./on_cinema_at_the_cinema"
 DECKER_FILE="./decker/parsed_episodes.json"
 OUTPUT_FILE="./all_media.json"
 
