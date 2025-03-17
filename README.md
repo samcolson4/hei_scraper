@@ -42,7 +42,7 @@ This repo is the scraper responsible for getting data from the HEI Network websi
     "franchise": "on_cinema", // replacing 'show'
     "media_type": "episode", // Other options: Article, trailer, movie (for Mister America)
     "season_name": "Season 15",
-    "season_number": "15", // useful for sorting, in particular the Decker seasons
+    "season_number": 15, // useful for sorting, in particular the Decker seasons
     "title": "'Valiant One' & 'Dog Man'",
     "date_published": "2025-01-29T00:00:00",
     "published_by": null, // in the case of articles, we'll add the name
