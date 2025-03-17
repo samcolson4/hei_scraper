@@ -6,6 +6,10 @@ Hi guys, it's movie time!
 
 This repo is the scraper responsible for getting data from the HEI Network website and others in order to create a full On Cinema timeline.
 
+<!-- DATA_COUNT_START -->
+On Cinema At The Cinema item count: 407
+<!-- DATA_COUNT_END -->
+
 ### Progress
 
 - [x] On Cinema (show)
@@ -13,9 +17,9 @@ This repo is the scraper responsible for getting data from the HEI Network websi
 - [x] Automate creating one large combined json file in root of repo
 - [x] On Cinema (podcast)
 - [x] HEI Network News v1
-- [ ] HEI Network News v2: Using the 'previous' button to go further back
-- [ ] Updated data structure (see below)
-- [ ] Non-scraped content, in the correct structure (for example the screening of Port of Call on YouTube)
+- [x] HEI Network News v2: Using the 'previous' button to go further back
+- [x] Updated data structure (see below)
+- [x] Non-scraped content, in the correct structure (for example the screening of Port of Call on YouTube)
 - [ ] Automate checking
 
 ### Data structure

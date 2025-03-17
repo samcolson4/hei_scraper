@@ -23,3 +23,10 @@ echo "→ into ${OUTPUT_FILE}"
 jq -s 'add' "$LATEST_ON_CINEMA_FILE" "$ON_CINEMA_PODCAST_FILE" "$DECKER_FILE" "$LATEST_HEI_NETWORK_NEWS_FILE" "$EPHEMERA_FILE" > "$OUTPUT_FILE"
 
 echo "✅ Done. Combined JSON written to ${OUTPUT_FILE}"
+
+COUNT=$(jq length "$OUTPUT_FILE")
+sed -i '' "/<!-- DATA_COUNT_START -->/,/<!-- DATA_COUNT_END -->/c\\
+<!-- DATA_COUNT_START -->\\
+On Cinema At The Cinema item count: ${COUNT}\\
+<!-- DATA_COUNT_END -->
+" README.md
