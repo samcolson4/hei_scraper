@@ -54,7 +54,7 @@ def extract_article_metadata(article_html: str) -> dict:
 
 
 def main():
-    html_file = Path("./hei_network_news/news_15_03_25.html")
+    html_file = Path("./news_15_03_25.html")
     article_urls = extract_article_urls(html_file)
     print(f"Found {len(article_urls)} article URLs:")
 
@@ -66,18 +66,23 @@ def main():
             response.raise_for_status()
             metadata = extract_article_metadata(response.text)
             article_data = {
+                "franchise": None,
                 "media_type": "article",
-                "collection": "news",
-                "article_title": metadata["title"],
-                "article_url": url,
-                "posted_at": metadata["published_at"].isoformat() if metadata["published_at"] else None,
+                "season_name": None,
+                "season_number": None,
+                "title": metadata["title"],
+                "date_published": metadata["published_at"].isoformat() if metadata["published_at"] else None,
+                "published_by": None,
+                "url": url,
                 "poster_url": metadata["poster_url"],
+                "is_bonus": False,
+                "is_meta": False
             }
             articles.append(article_data)
         except Exception as e:
             print(f"  → Failed to fetch or parse: {e}")
 
-    with open("hei_network_news/articles.json", "w", encoding="utf-8") as f:
+    with open("/articles.json", "w", encoding="utf-8") as f:
       json.dump(articles, f, indent=2, ensure_ascii=False)
 
 
