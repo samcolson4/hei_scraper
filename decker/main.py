@@ -1,6 +1,17 @@
 import requests
 from bs4 import BeautifulSoup
 import json
+
+SEASON_NAME_TO_NUMBER = {
+    "Classified": 1,
+    "Decker: Port of Call: Hawaii": 2,
+    "Gregg Turkington's Decker Vs. Dracula": 3,
+    "Unclassified": 4,
+    "Unsealed": 5,
+    "Mindwipe": 6,
+    "The Animated Adventures of Jack Decker": 7,
+    "Deck of Cards": 8,
+}
 from datetime import datetime
 import os
 import pdb
@@ -18,7 +29,7 @@ episode_divs = soup.select("div.episode.decker")
 
 for div in episode_divs:
     title_tag = div.select_one(".episode_title_text h4 a")
-    collection = title_tag.text.strip() if title_tag else None
+    season_name = title_tag.text.strip() if title_tag else None
     url = title_tag['href'] if title_tag else None
 
     description_tag = div.select_one(".episode_description")
@@ -56,14 +67,19 @@ for div in episode_divs:
 
         if episode_link:
             episodes.append({
-                "collection": collection,
-                "episode_title": episode_title,
-                "episode_description": "",
-                "aired_at": date,
-                "episode_url": episode_link,
-                "poster_url": image_url,
-                "show": "decker",
-                "media_type": "episode"
+                "franchise": "decker",
+                "media_type": "episode",
+                "season_name": next((k for k in SEASON_NAME_TO_NUMBER if k.lower() in season_name.lower()), season_name) if season_name else None,
+                "season_number": SEASON_NAME_TO_NUMBER.get(
+                    next((k for k in SEASON_NAME_TO_NUMBER if k.lower() in season_name.lower()), season_name)
+                ),
+                "title": episode_title,
+                "date_published": date,
+                "published_by": None,
+                "url": episode_link,
+                "poster_url": f"https://img.youtube.com/vi/{episode_link.split('v=')[-1]}/mqdefault.jpg" if "youtube.com" in episode_link else image_url,
+                "is_bonus": False,
+                "is_meta": False
             })
 
 # Output result
