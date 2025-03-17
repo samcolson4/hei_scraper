@@ -66,17 +66,33 @@ def extract_article_metadata(article_html: str) -> dict:
 
 
 def main():
+    now = datetime.now()
+    formatted_time = now.strftime("%d_%m_%y_%H_%M")
+    filename = f"articles_{formatted_time}.json"
+
+    article_files = sorted(Path(".").glob("articles_*.json"), key=lambda p: p.stat().st_mtime, reverse=True)
+    if article_files:
+        with open(article_files[0], "r", encoding="utf-8") as old_f:
+            existing_articles = json.load(old_f)
+    else:
+        existing_articles = []
+
+    existing_urls = {article.get("url") for article in existing_articles}
+
+    articles = existing_articles
     html_file = Path("./news_15_03_25.html")
     article_urls = extract_article_urls(html_file)
     print(f"Found {len(article_urls)} article URLs:")
 
-    articles = []
     for url in sorted(article_urls):
         print(f"Fetching: {url}")
         try:
             response = requests.get(url)
             response.raise_for_status()
             metadata = extract_article_metadata(response.text)
+            if url in existing_urls:
+                print(f"Skipping existing article: {url}")
+                continue
             article_data = {
                 "franchise": None,
                 "media_type": "article",
@@ -94,7 +110,7 @@ def main():
 
             print(json.dumps(article_data, indent=2, ensure_ascii=False))
 
-            with open("articles.json", "w", encoding="utf-8") as f:
+            with open(filename, "w", encoding="utf-8") as f:
                 json.dump(articles, f, indent=2, ensure_ascii=False)
         except Exception as e:
             print(f"  → Failed to fetch or parse: {e}")
