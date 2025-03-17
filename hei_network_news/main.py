@@ -4,17 +4,6 @@ import requests
 from bs4 import BeautifulSoup
 import json
 
-def extract_article_urls(html_file: Path) -> set[str]:
-    article_urls = set()
-    with html_file.open("r", encoding="utf-8") as f:
-        soup = BeautifulSoup(f, "html.parser")
-        for a in soup.find_all("a", href=True):
-            href = a['href']
-            if "/article" in href:
-                article_urls.add(href)
-    return article_urls
-
-
 def extract_article_metadata(article_html: str) -> dict:
     soup = BeautifulSoup(article_html, "html.parser")
     metadata = {"published_at": None, "title": None, "poster_url": None, "published_by": None}
@@ -80,11 +69,8 @@ def main():
     existing_urls = {article.get("url") for article in existing_articles}
 
     articles = existing_articles
-    html_file = Path("./news_15_03_25.html")
-    article_urls = extract_article_urls(html_file)
-    print(f"Found {len(article_urls)} article URLs:")
-
-    for url in sorted(article_urls):
+    url = "https://www.heinetwork.tv/article/i-am-alive-and-well/"
+    while url:
         print(f"Fetching: {url}")
         try:
             response = requests.get(url)
@@ -92,28 +78,74 @@ def main():
             metadata = extract_article_metadata(response.text)
             if url in existing_urls:
                 print(f"Skipping existing article: {url}")
-                continue
-            article_data = {
-                "franchise": None,
-                "media_type": "article",
-                "season_name": None,
-                "season_number": None,
-                "title": metadata["title"],
-                "date_published": metadata["published_at"].isoformat() if metadata["published_at"] else None,
-                "published_by": metadata["published_by"],
-                "url": url,
-                "poster_url": metadata["poster_url"],
-                "is_bonus": False,
-                "is_meta": False
-            }
-            articles.append(article_data)
-
-            print(json.dumps(article_data, indent=2, ensure_ascii=False))
-
-            with open(filename, "w", encoding="utf-8") as f:
-                json.dump(articles, f, indent=2, ensure_ascii=False)
+            else:
+                article_data = {
+                    "franchise": None,
+                    "media_type": "article",
+                    "season_name": None,
+                    "season_number": None,
+                    "title": metadata["title"],
+                    "date_published": metadata["published_at"].isoformat() if metadata["published_at"] else None,
+                    "published_by": metadata["published_by"],
+                    "url": url,
+                    "poster_url": metadata["poster_url"],
+                    "is_bonus": False,
+                    "is_meta": False
+                }
+                articles.append(article_data)
+                print(json.dumps(article_data, indent=2, ensure_ascii=False))
+                with open(filename, "w", encoding="utf-8") as f:
+                    json.dump(articles, f, indent=2, ensure_ascii=False)
+            # Find next article URL
+            soup = BeautifulSoup(response.text, "html.parser")
+            nav_next = soup.find(class_="nav-next")
+            if nav_next and nav_next.find("a"):
+                url = nav_next.find("a")["href"]
+            else:
+                url = None
         except Exception as e:
             print(f"  → Failed to fetch or parse: {e}")
+            break
+
+    # Begin nav-previous traversal from original page
+    url = "https://www.heinetwork.tv/article/i-am-alive-and-well/"
+    print("\nStarting nav-previous traversal...")
+    while url:
+        print(f"Fetching: {url}")
+        try:
+            response = requests.get(url)
+            response.raise_for_status()
+            metadata = extract_article_metadata(response.text)
+            if url in existing_urls:
+                print(f"Skipping existing article: {url}")
+            else:
+                article_data = {
+                    "franchise": None,
+                    "media_type": "article",
+                    "season_name": None,
+                    "season_number": None,
+                    "title": metadata["title"],
+                    "date_published": metadata["published_at"].isoformat() if metadata["published_at"] else None,
+                    "published_by": metadata["published_by"],
+                    "url": url,
+                    "poster_url": metadata["poster_url"],
+                    "is_bonus": False,
+                    "is_meta": False
+                }
+                articles.append(article_data)
+                print(json.dumps(article_data, indent=2, ensure_ascii=False))
+                with open(filename, "w", encoding="utf-8") as f:
+                    json.dump(articles, f, indent=2, ensure_ascii=False)
+            # Find previous article URL
+            soup = BeautifulSoup(response.text, "html.parser")
+            nav_prev = soup.find(class_="nav-previous")
+            if nav_prev and nav_prev.find("a"):
+                url = nav_prev.find("a")["href"]
+            else:
+                url = None
+        except Exception as e:
+            print(f"  → Failed to fetch or parse: {e}")
+            break
 
 
 if __name__ == "__main__":
