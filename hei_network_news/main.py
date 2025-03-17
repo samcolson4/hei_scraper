@@ -17,7 +17,7 @@ def extract_article_urls(html_file: Path) -> set[str]:
 
 def extract_article_metadata(article_html: str) -> dict:
     soup = BeautifulSoup(article_html, "html.parser")
-    metadata = {"published_at": None, "title": None, "poster_url": None}
+    metadata = {"published_at": None, "title": None, "poster_url": None, "published_by": None}
 
     # Extract publish date
     date_elem = (
@@ -50,6 +50,18 @@ def extract_article_metadata(article_html: str) -> dict:
         if img and img.get("src"):
             metadata["poster_url"] = img.get("src")
 
+    # Extract published_by
+    meta_elem = soup.find(class_="entry-meta")
+    if meta_elem:
+        text = meta_elem.get_text(strip=True)
+        if "by " in text:
+            published_by = text.split("by ", 1)[-1].strip()
+            metadata["published_by"] = published_by
+        else:
+            metadata["published_by"] = None
+    else:
+        metadata["published_by"] = None
+
     return metadata
 
 
@@ -72,7 +84,7 @@ def main():
                 "season_number": None,
                 "title": metadata["title"],
                 "date_published": metadata["published_at"].isoformat() if metadata["published_at"] else None,
-                "published_by": None,
+                "published_by": metadata["published_by"],
                 "url": url,
                 "poster_url": metadata["poster_url"],
                 "is_bonus": False,
@@ -82,7 +94,7 @@ def main():
 
             print(json.dumps(article_data, indent=2, ensure_ascii=False))
 
-            with open("/articles.json", "w", encoding="utf-8") as f:
+            with open("articles.json", "w", encoding="utf-8") as f:
                 json.dump(articles, f, indent=2, ensure_ascii=False)
         except Exception as e:
             print(f"  → Failed to fetch or parse: {e}")
