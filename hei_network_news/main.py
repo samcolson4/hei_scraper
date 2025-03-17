@@ -79,11 +79,13 @@ def main():
                 "is_meta": False
             }
             articles.append(article_data)
+
+            print(json.dumps(article_data, indent=2, ensure_ascii=False))
+
+            with open("/articles.json", "w", encoding="utf-8") as f:
+                json.dump(articles, f, indent=2, ensure_ascii=False)
         except Exception as e:
             print(f"  → Failed to fetch or parse: {e}")
-
-    with open("/articles.json", "w", encoding="utf-8") as f:
-      json.dump(articles, f, indent=2, ensure_ascii=False)
 
 
 if __name__ == "__main__":
