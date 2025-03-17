@@ -5,6 +5,7 @@ from datetime import datetime
 import os
 import pdb
 import glob
+import re
 
 def get_latest_json_file():
     json_files = glob.glob("episodes_*.json")
@@ -79,21 +80,29 @@ with open("episodes.txt", "r") as file:
     formatted_time = now.strftime("%d_%m_%y_%H_%M")
     filename = f"episodes_{formatted_time}.json"
     existing_urls = load_existing_urls()
+    processed_urls = set()
 
     for line in file:
         episode_url = "https://" + line.strip()
         if episode_url in existing_urls:
             print(f"Skipping existing episode: {episode_url}")
             continue
+        if episode_url in processed_urls:
+            print(f"Already processed during this run, skipping: {episode_url}")
+            continue
 
         data = {
-            "episode_url": episode_url,
-            "collection": "",
-            "episode_title": "",
+            "franchise": "on_cinema",
+            "media_type": "episode",
+            "season_name": "",
+            "season_number": None,
+            "title": "",
+            "date_published": "",
+            "published_by": None,
+            "url": episode_url,
             "poster_url": "",
-            "aired_at": "",
-            "show": "on_cinema",
-            "media_type": "episode"
+            "is_bonus": False,
+            "is_meta": False
         }
 
         headers = {
@@ -104,17 +113,26 @@ with open("episodes.txt", "r") as file:
         if response.status_code == 200:
             soup = BeautifulSoup(response.text, "html.parser")
 
-            data["collection"] = normalize_text(
+            data["season_name"] = normalize_text(
                 soup.find(
                     class_="text-yellow m-0 text-lg font-bold uppercase"
                 ).text.strip()
             )
-            data["episode_title"] = normalize_text(
+            if data["season_name"].lower() == "bonus content":
+                data["is_bonus"] = True
+            import re
+            match = re.search(r"Season\s+(\d+)", data["season_name"], re.IGNORECASE)
+            if match:
+                data["season_number"] = int(match.group(1))
+            else:
+                data["season_number"] = None
+
+            data["title"] = normalize_text(
                 soup.find(
                     class_="text-yellow semibold col-span-full md:text-5xl m-0 text-3xl"
                 ).text.strip()
             )
-            data["aired_at"] = extract_date(
+            data["date_published"] = extract_date(
                 normalize_text(soup.find(class_="text-red font-bold").text.strip())
             )
             data["poster_url"] = normalize_text(
@@ -124,7 +142,11 @@ with open("episodes.txt", "r") as file:
             )
 
             print(data)
+            if data["url"] in existing_urls:
+                print(f"Duplicate URL detected, skipping append: {data['url']}")
+                continue
             append_to_json(filename, data)
+            processed_urls.add(episode_url)
         else:
             print(
                 f"Failed to retrieve the webpage. Status code: {response.status_code}"
