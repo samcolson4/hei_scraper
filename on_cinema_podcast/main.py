@@ -2,7 +2,7 @@ from bs4 import BeautifulSoup
 import json
 from datetime import datetime
 
-with open("on_cinema_podcast/podcast_html.html", "r", encoding="utf-8") as file:
+with open("./podcast_html.html", "r", encoding="utf-8") as file:
     soup = BeautifulSoup(file, "html.parser")
 
 episodes_json = []
@@ -47,17 +47,21 @@ for episode_div in soup.select(".episode.podcast"):
     show = "on_cinema_podcast"
 
     episode_data = {
-        "episode_url": youtube_link or full_episode_url,
-        "collection": collection,
-        "episode_title": episode_title,
-        "poster_url": poster_url,
-        "aired_at": aired_at,
-        "show": show,
-        "media_type": "podcast"
+            "franchise": "on_cinema",
+            "media_type": "podcast",
+            "season_name": "The Podcast",
+            "season_number": None,
+            "title": episode_title,
+            "date_published": aired_at,
+            "published_by": None,
+            "url": youtube_link or full_episode_url,
+            "poster_url": poster_url,
+            "is_bonus": False,
+            "is_meta": False
     }
 
     episodes_json.append(episode_data)
 
 # Output as JSON
-with open("on_cinema_podcast/podcasts.json", "w", encoding="utf-8") as out_file:
+with open("./podcasts.json", "w", encoding="utf-8") as out_file:
     json.dump(episodes_json, out_file, indent=2)
